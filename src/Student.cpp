@@ -19,13 +19,12 @@ set<string> Student::getClassCodes() const {
     return const_cast<set<string>&>(class_codes);
 }
 
+void Student::addClass(const string& code) {
+    class_codes.insert(code);
+}
 
 bool Student::hasClass(const string& code) const {
     return class_codes.find(code) != class_codes.end();
-}
-
-void Student::addClass(const string& code) {
-    class_codes.insert(code);
 }
 
 bool Student::removeClass(const string& code) {

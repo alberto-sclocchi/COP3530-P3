@@ -81,3 +81,97 @@ bool CampusCompass::isValidClassCode(const string& s) const {
     }
     return true; 
 }
+
+void CampusCompass::insert(const string& args) {
+    istringstream ss(args);
+    string id, name, residence_id_str;
+    set<string> class_codes;
+    string s;
+    int count = 0;
+
+    while (getline(ss, s, ' ')) {
+        if (count == 0) {
+            id = s;
+        } else if (count == 1) {
+            name = s.substr(1, s.length() - 2);
+        } else if (count == 2) {
+            residence_id_str = s;
+        } else if (count > 2 && count < 9){
+            class_codes.insert(s);
+        }
+        else {
+            break; 
+        }
+        count++;
+    }
+
+    if (isValidUfid(id) && isValidName(name)) {
+        int residence_id = stoi(residence_id_str);
+        students[id] = Student(name, residence_id);
+
+        for (const auto& code : class_codes) {
+            if (isValidClassCode(code)) {
+                students[id].addClass(code);
+            } else {
+                cout << "unsuccessful" << endl;
+                return;
+            }
+        }
+
+        cout << "successful" << endl;
+
+    } else {
+        cout << "unsuccessful" << endl;
+    }
+}
+
+void CampusCompass::remove(const string& id) {
+    if (isValidUfid(id)) {
+        auto it = students.find(id);
+        if (it != students.end()) {
+            students.erase(it);
+            cout << "successful" << endl;
+        } else {
+            cout << "unsuccessful" << endl;
+        }
+    } else {
+        cout << "unsuccessful" << endl;
+    }
+}
+
+void CampusCompass::dropClass(const string& id, const string& code) {
+    if (isValidUfid(id) && isValidClassCode(code)) {
+        auto it = students.find(id);
+        if (it != students.end()) {
+            if (it->second.hasClass(code)) {
+                it->second.removeClass(code);
+                cout << "successful" << endl;
+            } else {
+                cout << "unsuccessful" << endl;
+            }
+        } else {
+            cout << "unsuccessful" << endl;
+        }
+    } else {
+        cout << "unsuccessful" << endl;
+    }
+}
+
+void CampusCompass::replaceClass(const string& id, const string& c1, const string& c2) {
+    if (isValidUfid(id) && isValidClassCode(c1) && isValidClassCode(c2)) {
+        auto it = students.find(id);
+        if (it != students.end()) {
+            if (it->second.hasClass(c1)) {
+                it->second.removeClass(c1);
+                it->second.addClass(c2);
+                cout << "successful" << endl;
+            } else {
+                cout << "unsuccessful" << endl;
+            }
+        } else {
+            cout << "unsuccessful" << endl;
+        }
+    } else {
+        cout << "unsuccessful" << endl;
+    }
+}
