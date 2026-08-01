@@ -12,7 +12,7 @@ void Graph::addEdge(int from, int to, int weight) {
     graph[to].push_back(make_pair(from, edge));
 }
 
-bool Graph::toggleEdge(int from, int to) {
+void Graph::toggleEdge(int from, int to) {
     for(auto& edge : graph[from]) {
         if(edge.first == to) {
             edge.second.closed = !edge.second.closed;
@@ -24,8 +24,6 @@ bool Graph::toggleEdge(int from, int to) {
             edge.second.closed = !edge.second.closed;
         }
     }
-
-    return true;
 }
 
 int Graph::getEdgeStatus(int from, int to) const {
@@ -42,6 +40,9 @@ int Graph::getEdgeStatus(int from, int to) const {
 
 
 bool Graph::isConnected(int a, int b) const {
+    if(graph.find(a) == graph.end() || graph.find(b) == graph.end()) {
+        return false;
+    }
     stack<int> s;
     unordered_set<int> visited;
     s.push(a);

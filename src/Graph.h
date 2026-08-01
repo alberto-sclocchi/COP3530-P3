@@ -15,7 +15,7 @@ private:
 public:
     void addEdge(int a, int b, int time);
 
-    bool toggleEdge(int a, int b);          
+    void toggleEdge(int a, int b);          
     int  getEdgeStatus(int a, int b) const; 
 
     bool dijkstra(int source) const;

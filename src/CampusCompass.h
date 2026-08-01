@@ -31,5 +31,5 @@ public:
     CampusCompass();
     bool parseCSV(const std::string& edges_filepath, const std::string& classes_filepath);
     bool parseCommand(const std::string& command);
-    int toMinutes(string time);
+    int toMinutes(const std::string& time);
 };

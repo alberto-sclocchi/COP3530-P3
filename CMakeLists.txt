@@ -23,9 +23,9 @@ add_executable(Main
         src/main.cpp # your main file
         src/CampusCompass.cpp
         src/CampusCompass.h
-        # add your own header files below - should be automatically added in CLion
-        # example (can also separate with newlines):
-        # src/AVL.h src/AVL.cpp
+        src/Graph.cpp src/Graph.h
+        src/Student.cpp src/Student.h
+        src/Class.cpp src/Class.h
         )
         
 # These tests can use the Catch2-provided main
@@ -33,9 +33,9 @@ add_executable(Tests
         test/test.cpp # your test file
         src/CampusCompass.cpp
         src/CampusCompass.h
-        # add your own header files below - should be automatically added in CLion
-        # example (can also separate with newlines):
-        # src/AVL.h src/AVL.cpp
+        src/Graph.cpp src/Graph.h
+        src/Student.cpp src/Student.h
+        src/Class.cpp src/Class.h
         )
         
 target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain) #link catch to test.cpp file
