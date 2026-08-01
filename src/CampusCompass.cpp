@@ -46,6 +46,22 @@ bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes
         return false;
     }
 
+    ifstream edges_file("../" + edges_filepath);
+    if (!edges_file.is_open()) {
+        cout<<"Error: Edges file could not open."<<endl;
+        return false;
+    }
+
+    getline(edges_file, line);
+    while (getline(edges_file, line)) {
+        istringstream ss(line);
+        string from, to, wt;
+        getline(ss, from, ',');
+        getline(ss, to, ',');
+        getline(ss, wt, ',');
+
+        graph.addEdge(stoi(from), stoi(to), stoi(wt));
+    }
 
     return true;
 }
@@ -175,3 +191,21 @@ void CampusCompass::replaceClass(const string& id, const string& c1, const strin
         cout << "unsuccessful" << endl;
     }
 }
+
+void CampusCompass::removeClass(const string& code) {
+    int canceled_count = 0;
+    if (isValidClassCode(code)) {
+        for(auto& pair : students) {
+            pair.second.removeClass(code);
+            if(!pair.second.getClassCodes().size() == 0 && !pair.second.hasClass(code)) {
+                cout << "unsuccessful" << endl;
+                return;
+            }
+        }
+        cout << "successful" << endl;
+    } else {
+        cout << "unsuccessful" << endl;
+    }
+}
+
+

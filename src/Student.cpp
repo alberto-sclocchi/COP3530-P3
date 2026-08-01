@@ -16,7 +16,7 @@ int Student::getResidenceId() const {
 }
 
 set<string> Student::getClassCodes() const {
-    return const_cast<set<string>&>(class_codes);
+    return class_codes;
 }
 
 void Student::addClass(const string& code) {
