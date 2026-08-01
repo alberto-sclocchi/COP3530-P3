@@ -9,9 +9,7 @@
 
 using namespace std;
 
-CampusCompass::CampusCompass() {
-
-}
+CampusCompass::CampusCompass() {}
 
 int toMinutes(string time) {
     int hours = stoi(time.substr(0, 2));
@@ -208,4 +206,34 @@ void CampusCompass::removeClass(const string& code) {
     }
 }
 
+void CampusCompass::toggleEdgesClosure(const string& args) {
+    istringstream ss(args);
+    string a_str, b_str;
+    
+    while(getline(ss, a_str, ' ') && getline(ss, b_str, ' ')) {
+        int a = stoi(a_str);
+        int b = stoi(b_str);
+        graph.toggleEdge(a, b);
+    }
 
+    cout << "successful" << endl;
+
+}
+
+
+void CampusCompass::checkEdgeStatus(int a, int b) {
+    int status = graph.getEdgeStatus(a, b);
+    if (status == -1) {
+        cout << "DNE" << endl;
+    } else {
+        cout << (status == 1 ? "closed" : "open") << endl;
+    }
+}
+
+void CampusCompass::isConnected(int a, int b) {
+    if (graph.isConnected(a, b)) {
+        cout << "successful" << endl;
+    } else {
+        cout << "unsuccessful" << endl;
+    }
+}

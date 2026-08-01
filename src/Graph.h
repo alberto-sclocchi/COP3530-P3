@@ -11,7 +11,7 @@ struct Edge {
 
 class Graph {
 private:
-    std::map<int, pair<int, Edge>> edges;   
+    std::map<int, std::vector<std::pair<int, Edge>>> graph;
 public:
     void addEdge(int a, int b, int time);
 
