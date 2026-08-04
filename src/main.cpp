@@ -20,7 +20,10 @@ int main() {
     for (int i = 0; i < no_of_lines; i++) {
         getline(cin, command);
 
-        // parse your commands however you see fit
-        compass.parseCommand(command);
+        bool success = compass.parseCommand(command);
+
+        if (!success) {
+            cout << "unsuccessful" << endl;
+        }
     }
 }

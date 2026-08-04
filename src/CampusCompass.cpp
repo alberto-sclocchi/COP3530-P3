@@ -62,9 +62,63 @@ bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes
 }
 
 bool CampusCompass::parseCommand(const string &command) {
-    // do whatever regex you need to parse validity
-    // hint: return a boolean for validation when testing. For example:
+   
     bool is_valid = true; // replace with your actual validity checking
+
+    istringstream ss(command);
+    string cmd = command.substr(0, command.find(' '));
+
+    if(cmd == "insert") {
+
+        insert(command.substr(cmd.length() + 1));
+
+    } else if (cmd == "remove") {
+
+        remove(command.substr(cmd.length() + 1));
+
+    } else if (cmd == "dropClass") {
+
+        istringstream ss(command.substr(cmd.length() + 1));
+        string id, code;
+        ss >> id >> code;
+        dropClass(id, code);
+
+    } else if (cmd == "replaceClass") {
+
+        istringstream ss(command.substr(cmd.length() + 1));
+        string id, c1, c2;
+        ss >> id >> c1 >> c2;
+        replaceClass(id, c1, c2);
+
+    } else if (cmd == "removeClass") {
+
+        removeClass(command.substr(cmd.length() + 1));
+
+    } else if (cmd == "toggleEdgesClosure") {
+
+        toggleEdgesClosure(command.substr(cmd.length() + 1));
+
+    } else if (cmd == "checkEdgeStatus") {
+
+        istringstream ss(command.substr(cmd.length() + 1));
+        int a, b;
+        ss >> a >> b;
+        checkEdgeStatus(a, b);
+
+    } else if (cmd == "isConnected") {
+
+        istringstream ss(command.substr(cmd.length() + 1));
+        int a, b;
+        ss >> a >> b;
+        isConnected(a, b);
+
+    } else if (cmd == "printShortestEdges") {
+
+        printShortestEdges(command.substr(cmd.length() + 1));
+
+    } else {
+        is_valid = false; 
+    }
 
     return is_valid;
 }
