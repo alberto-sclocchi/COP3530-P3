@@ -282,3 +282,18 @@ void CampusCompass::isConnected(int a, int b) {
         cout << "unsuccessful" << endl;
     }
 }
+
+void CampusCompass::printShortestEdges(const string& id) {
+    int residence_id = students[id].getResidenceId();
+    auto shortest_paths = graph.dijkstra(residence_id);
+
+    cout<<"Time For Shortest Edges: "<<students[id].getName()<<endl;
+
+    for (const auto& student_class : students[id].getClassCodes()) {
+        if (classes.find(student_class) != classes.end()) {
+            int class_location = classes[student_class].getLocationId();
+            int shortest_time = shortest_paths[class_location].first;
+            cout<<student_class<<": "<<shortest_time<<endl;
+        }
+    }
+}

@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stack>
+#include <queue>
+#include <climits>
 
 using namespace std;
 
@@ -66,3 +68,50 @@ bool Graph::isConnected(int a, int b) const {
     return false;
 }
 
+unordered_map<int, pair<int,int>> Graph::dijkstra(int source) const{
+    unordered_map<int, pair<int, int>> result;
+    for (const auto& vertex : graph) {
+        result[vertex.first] = {-1, -1};
+    }
+
+    int max_id = graph.rbegin()->first;
+    vector<int> distances(max_id + 1, INT_MAX);
+    vector<int> predecessors(max_id + 1, -1);
+    unordered_set<int> visited;
+
+    distances[source] = 0;
+
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> active_vertices;
+    active_vertices.push({0, source});
+
+    while (!active_vertices.empty()) {
+        int currentVertex = active_vertices.top().second;
+        active_vertices.pop();
+
+        if (visited.find(currentVertex) != visited.end()) {
+            continue;
+        }
+
+        visited.insert(currentVertex);
+
+        for (const auto& neighbor : graph.at(currentVertex)) {
+            if (!neighbor.second.closed) {
+                int newDist = distances[currentVertex] + neighbor.second.time;
+                if (newDist < distances[neighbor.first]) {
+                    distances[neighbor.first] = newDist;
+                    predecessors[neighbor.first] = currentVertex;
+                    active_vertices.push({newDist, neighbor.first});
+                }
+            }
+        }
+    }
+
+    for (const auto& vertex : graph) {
+        int id = vertex.first;
+        if (distances[id] != INT_MAX) {
+            result[id] = {distances[id], predecessors[id]};
+        }
+    }
+
+    return result;
+}

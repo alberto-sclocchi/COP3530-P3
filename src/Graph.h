@@ -2,6 +2,7 @@
 #include <map>
 #include <utility>
 #include <vector>
+#include <unordered_map>
 
 struct Edge {
     int time;
@@ -18,8 +19,7 @@ public:
     void toggleEdge(int a, int b);          
     int  getEdgeStatus(int a, int b) const; 
 
-    bool dijkstra(int source) const;
-    bool hasNode(int id) const;
+    std::unordered_map<int, std::pair<int,int>> dijkstra(int source) const;
     bool isConnected(int a, int b) const;             
     int mstCost(int source) const;  
 };
