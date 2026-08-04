@@ -5,6 +5,7 @@
 #include <stack>
 #include <queue>
 #include <climits>
+#include <set>
 
 using namespace std;
 
@@ -53,9 +54,7 @@ bool Graph::isConnected(int a, int b) const {
         int current = s.top();
         s.pop();
 
-        vector<pair<int, Edge>> neighbors = graph.at(current);
-
-        for (const auto& neighbor : neighbors) {
+        for (const auto& neighbor : getNeighbors(current)) {
             if(neighbor.first == b && !neighbor.second.closed) {
                 return true;
             }
@@ -73,6 +72,8 @@ unordered_map<int, pair<int,int>> Graph::dijkstra(int source) const{
     for (const auto& vertex : graph) {
         result[vertex.first] = {-1, -1};
     }
+
+    if(graph.empty() || graph.find(source) == graph.end()) return result;
 
     int max_id = graph.rbegin()->first;
     vector<int> distances(max_id + 1, INT_MAX);
@@ -94,7 +95,7 @@ unordered_map<int, pair<int,int>> Graph::dijkstra(int source) const{
 
         visited.insert(currentVertex);
 
-        for (const auto& neighbor : graph.at(currentVertex)) {
+        for (const auto& neighbor : getNeighbors(currentVertex)) {
             if (!neighbor.second.closed) {
                 int newDist = distances[currentVertex] + neighbor.second.time;
                 if (newDist < distances[neighbor.first]) {
@@ -114,4 +115,45 @@ unordered_map<int, pair<int,int>> Graph::dijkstra(int source) const{
     }
 
     return result;
+}
+
+bool Graph::hasNode(int a) const {
+    return graph.find(a) != graph.end();
+}
+
+vector<pair<int, Edge>> Graph::getNeighbors(int a) const {
+    if (graph.find(a) != graph.end()) {
+        return graph.at(a);
+    }
+    return {};
+}
+
+int Graph::mstCost(const set<int>& vertices) const {
+    if (vertices.size() <= 1) return 0;
+
+    std::unordered_set<int> visited;
+    int total = 0;
+    std::priority_queue<std::pair<int,int>, std::vector<std::pair<int,int>>, std::greater<std::pair<int,int>>> pq;
+    pq.push({0, *vertices.begin()});
+
+    while (!pq.empty()) {
+        auto top = pq.top();
+        int weight = top.first;
+        int vertex = top.second;
+        pq.pop();
+        if (visited.find(vertex) != visited.end()) continue;
+
+        visited.insert(vertex);
+        total += weight;
+
+        for (const auto& neighbor : getNeighbors(vertex)) {
+            if (neighbor.second.closed) continue;                
+            if (!vertices.count(neighbor.first)) continue;        
+            if (visited.find(neighbor.first) != visited.end()) continue;
+            
+            pq.push({neighbor.second.time, neighbor.first});
+        }
+    }
+
+    return total;
 }

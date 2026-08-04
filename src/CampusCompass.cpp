@@ -21,8 +21,12 @@ int CampusCompass::toMinutes(const string& time) {
 bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes_filepath) {
     ifstream classes_file("../" + classes_filepath);
     if (!classes_file.is_open()) {
-        cout<<"Error: Classes file could not open."<<endl;
-        return false;
+        classes_file.clear();
+        classes_file.open(classes_filepath);
+        if (!classes_file.is_open()){
+            cout<<"Error: Classes file could not open."<<endl;
+            return false;
+        }
     }
 
     string line;
@@ -40,8 +44,12 @@ bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes
 
     ifstream edges_file("../" + edges_filepath);
     if (!edges_file.is_open()) {
-        cout<<"Error: Edges file could not open."<<endl;
-        return false;
+        edges_file.clear();
+        edges_file.open(edges_filepath);
+        if(!edges_file.is_open()){
+            cout<<"Error: Edges file could not open."<<endl;
+            return false;
+        }
     }
 
     getline(edges_file, line);
@@ -67,6 +75,8 @@ bool CampusCompass::parseCommand(const string &command) {
 
     istringstream ss(command);
     string cmd = command.substr(0, command.find(' '));
+
+    if(command.length() < 6 || command[cmd.length()] != ' ') return false;
 
     if(cmd == "insert") {
 
@@ -116,6 +126,8 @@ bool CampusCompass::parseCommand(const string &command) {
 
         printShortestEdges(command.substr(cmd.length() + 1));
 
+    } else if(cmd == "printStudentZone"){
+        printStudentZone(command.substr(cmd.length() + 1));
     } else {
         is_valid = false; 
     }
@@ -338,16 +350,48 @@ void CampusCompass::isConnected(int a, int b) {
 }
 
 void CampusCompass::printShortestEdges(const string& id) {
-    int residence_id = students[id].getResidenceId();
+    auto student = students[id];
+    int residence_id = student.getResidenceId();
     auto shortest_paths = graph.dijkstra(residence_id);
 
-    cout<<"Time For Shortest Edges: "<<students[id].getName()<<endl;
+    cout<<"Time For Shortest Edges: "<<student.getName()<<endl;
 
-    for (const auto& student_class : students[id].getClassCodes()) {
+    for (const auto& student_class : student.getClassCodes()) {
         if (classes.find(student_class) != classes.end()) {
             int class_location = classes[student_class].getLocationId();
             int shortest_time = shortest_paths[class_location].first;
             cout<<student_class<<": "<<shortest_time<<endl;
         }
     }
+}
+
+void CampusCompass::printStudentZone(const string& id) {
+    auto student = students[id];
+    int residence_id = student.getResidenceId();
+    auto shortest_paths = graph.dijkstra(residence_id);
+
+    set<int> zone_locations;
+    zone_locations.insert(residence_id);
+
+
+    for (const auto& student_class : student.getClassCodes()) {
+        if (classes.find(student_class) != classes.end()) {
+            int class_location = classes[student_class].getLocationId();
+            int shortest_time = shortest_paths[class_location].first;
+
+            if(shortest_time == -1) continue;
+
+            int curr = class_location;
+            while(curr != residence_id){
+                zone_locations.insert(curr);
+                curr = shortest_paths[curr].second;
+            }
+
+        }
+    }
+
+    int mst_cost = graph.mstCost(zone_locations);
+
+    cout<<"Student Zone Cost For " << student.getName() <<": "<< mst_cost<<endl;
+
 }
