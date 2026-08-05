@@ -13,6 +13,7 @@ struct Edge {
 
 class Graph {
 private:
+    //create an adjacency list for the graph data structure 
     std::map<int, std::vector<std::pair<int, Edge>>> graph;
 public:
     void addEdge(int a, int b, int time);

@@ -14,6 +14,7 @@ using namespace std;
 CampusCompass::CampusCompass() {}
 
 int CampusCompass::toMinutes(const string& time) {
+    //convert string time to comparable int by converting it minutes
     int hours = stoi(time.substr(0, 2));
     int minutes = stoi(time.substr(3, 2));
     return hours * 60 + minutes;
@@ -21,6 +22,7 @@ int CampusCompass::toMinutes(const string& time) {
 
 
 bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes_filepath) {
+    //open classes file
     ifstream classes_file("../" + classes_filepath);
     if (!classes_file.is_open()) {
         classes_file.clear();
@@ -31,6 +33,7 @@ bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes
         }
     }
 
+    //create class map with real class objects
     string line;
     getline(classes_file, line);            
     while (getline(classes_file, line)) {
@@ -44,6 +47,7 @@ bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes
         classes[code] = class_ex;
     }
 
+    //open edges file
     ifstream edges_file("../" + edges_filepath);
     if (!edges_file.is_open()) {
         edges_file.clear();
@@ -54,6 +58,7 @@ bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes
         }
     }
 
+    //add edges to graph
     getline(edges_file, line);
     while (getline(edges_file, line)) {
         istringstream ss(line);
@@ -73,11 +78,12 @@ bool CampusCompass::parseCSV(const string& edges_filepath, const string& classes
 
 bool CampusCompass::parseCommand(const string &command) {
    
-    bool is_valid = true; // replace with your actual validity checking
+    bool is_valid = true; 
 
     istringstream ss(command);
     string cmd = command.substr(0, command.find(' '));
 
+    //catch invalid commands
     if(command.length() < 6 || command[cmd.length()] != ' ') return false;
 
     if(cmd == "insert") {
@@ -90,6 +96,7 @@ bool CampusCompass::parseCommand(const string &command) {
 
     } else if (cmd == "dropClass") {
 
+        //retrieve code and id from user input
         istringstream ss(command.substr(cmd.length() + 1));
         string id, code;
         ss >> id >> code;
@@ -97,6 +104,7 @@ bool CampusCompass::parseCommand(const string &command) {
 
     } else if (cmd == "replaceClass") {
 
+        //retrieve id, first and second class codes from user input
         istringstream ss(command.substr(cmd.length() + 1));
         string id, c1, c2;
         ss >> id >> c1 >> c2;
@@ -112,6 +120,7 @@ bool CampusCompass::parseCommand(const string &command) {
 
     } else if (cmd == "checkEdgeStatus") {
 
+        //retrieve vertices from user input
         istringstream ss(command.substr(cmd.length() + 1));
         int a, b;
         ss >> a >> b;
@@ -119,6 +128,7 @@ bool CampusCompass::parseCommand(const string &command) {
 
     } else if (cmd == "isConnected") {
 
+        //retrieve vertices from user input
         istringstream ss(command.substr(cmd.length() + 1));
         int a, b;
         ss >> a >> b;
@@ -142,10 +152,12 @@ bool CampusCompass::parseCommand(const string &command) {
         
     }
 
+    //return if it was a valid command
     return is_valid;
 }
 
 bool CampusCompass::isValidUfid(const string& s) const {
+    //id must have 8 digits
     regex isValidUFIRegex = regex("^[0-9]{8}$");
     if (!regex_match(s, isValidUFIRegex)) {
         return false;
@@ -154,6 +166,7 @@ bool CampusCompass::isValidUfid(const string& s) const {
 }
 
 bool CampusCompass::isValidName(const string& s) const {
+    //name must contain lower case or upper case letters or spaces
     regex isValidName = regex("^[A-Za-z ]+$");
     if (!regex_match(s, isValidName)) {
         return false;
@@ -162,6 +175,7 @@ bool CampusCompass::isValidName(const string& s) const {
 }
 
 bool CampusCompass::isValidClassCode(const string& s) const {
+    //class code must have 3 upper case letters and 4 digits
     regex isValidClassCode = regex("^[A-Z]{3}[0-9]{4}$");
     if (!regex_match(s, isValidClassCode)) {
         return false;
@@ -181,6 +195,7 @@ bool CampusCompass::insert(const string& args) {
     getline(ss, name, '"');
     ss.get();
 
+    //retrieve user information
     while (getline(ss, s, ' ')) {
         if (count == 1) {
             id = s;
@@ -201,12 +216,14 @@ bool CampusCompass::insert(const string& args) {
                 return false; 
             }
         } else {
+            //store class codes
             class_codes.insert(s);
             continue;
         }
         count++;
     }
 
+    //return false if class code number and class code sizes are different
     if (count != 4 || class_codes.size() != num_classes) {
         cout << "unsuccessful" << endl;
         return false; 
@@ -243,6 +260,7 @@ bool CampusCompass::remove(const string& id) {
     if (isValidUfid(id)) {
         auto it = students.find(id);
         if (it != students.end()) {
+            //erase student from map
             students.erase(it);
             cout << "successful" << endl;
             return true;
@@ -261,8 +279,11 @@ bool CampusCompass::dropClass(const string& id, const string& code) {
         auto it = students.find(id);
         if (it != students.end() && classes.find(code) != classes.end()) {
             if (it->second.hasClass(code)) {
+                //remove class from student
                 it->second.removeClass(code);
+
                 if (it->second.classCount() == 0) {
+                    //erase student if class count is equal to 0
                     students.erase(it);
                 }
                 cout << "successful" << endl;
@@ -285,6 +306,7 @@ bool CampusCompass::replaceClass(const string& id, const string& c1, const strin
     if (isValidUfid(id) && isValidClassCode(c1) && isValidClassCode(c2)) {
         auto it = students.find(id);
         if (it != students.end()) {
+            //check if student has first class and does NOT have second class and second class is an actual class
             if (it->second.hasClass(c1) && !it->second.hasClass(c2) && classes.find(c2) != classes.end()) {
                 it->second.removeClass(c1);
                 it->second.addClass(c2);
@@ -310,10 +332,12 @@ int CampusCompass::removeClass(const string& code) {
         auto it = students.begin();
         while (it != students.end()) {
             if (it->second.hasClass(code)) {
+                //remove class from student and increase counter
                 it->second.removeClass(code);
                 canceled_count++;
             }
 
+            //erase student that has 0 classes remaining
             if (it->second.classCount() == 0) {
                 it = students.erase(it);
             } else {
@@ -345,6 +369,7 @@ bool CampusCompass::toggleEdgesClosure(const string& args) {
 
     int counter = 0;
 
+    //toggle edges for each pair of class codes
     while (getline(ss, a_str, ' ') && getline(ss, b_str, ' ') && counter < n) {
         int a = stoi(a_str);
         int b = stoi(b_str);
@@ -361,6 +386,7 @@ bool CampusCompass::toggleEdgesClosure(const string& args) {
 string CampusCompass::checkEdgeStatus(int a, int b) {
     int status = graph.getEdgeStatus(a, b);
     if (status == -1) {
+        //return DNE if edge does not exist
         cout << "DNE" << endl;
         return "DNE";
     } else {
@@ -383,11 +409,14 @@ bool CampusCompass::isConnected(int a, int b) {
 map<string,int> CampusCompass::printShortestEdges(const string& id) {
     auto student = students[id];
     int residence_id = student.getResidenceId();
+
+    //calculate shortest path from student's location to every vertices 
     auto shortest_paths = graph.dijkstra(residence_id);
 
     cout<<"Time For Shortest Edges: "<<student.getName()<<endl;
     map<string, int> result;
 
+    //get shortest path for student's class codes
     for (const string& student_class : student.getClassCodes()) {
         if (classes.find(student_class) != classes.end()) {
             int class_location = classes[student_class].getLocationId();
@@ -403,12 +432,14 @@ map<string,int> CampusCompass::printShortestEdges(const string& id) {
 void CampusCompass::printStudentZone(const string& id) {
     auto student = students[id];
     int residence_id = student.getResidenceId();
+    //calculate shortest path from student's location to every vertices 
     auto shortest_paths = graph.dijkstra(residence_id);
 
     set<int> zone_locations;
     zone_locations.insert(residence_id);
 
 
+    //store vertices that appear in each class code shorter path to create subgraph
     for (const string& student_class : student.getClassCodes()) {
         if (classes.find(student_class) != classes.end()) {
             int class_location = classes[student_class].getLocationId();
@@ -425,6 +456,7 @@ void CampusCompass::printStudentZone(const string& id) {
         }
     }
 
+    //call mst on subgraph
     int mst_cost = graph.mstCost(zone_locations);
 
     cout<<"Student Zone Cost For " << student.getName() <<": "<< mst_cost<<endl;
@@ -446,6 +478,7 @@ void CampusCompass::verifySchedule(const string& id){
         return;
     }
 
+    //sort class codes based on their start time (default = class code)
     sort(schedule.begin(), schedule.end(), [this](const string& a, const string& b){
         int start_time_a = classes[a].getStartMinutes();
         int start_time_b = classes[b].getStartMinutes();
@@ -456,12 +489,19 @@ void CampusCompass::verifySchedule(const string& id){
     cout << "Schedule Check for " << student.getName() << ":" << endl;
 
     for (int i = 0; i < schedule.size() - 1; i++) {
+        //classes location ids
         int class_location_1 = classes[schedule[i]].getLocationId();
         int class_location_2 = classes[schedule[i + 1]].getLocationId();
 
+        //get shortest path for first class to second class
         auto shortest_times = graph.dijkstra(class_location_1);
         int next_class_shortest_time = shortest_times[class_location_2].first;
+
+        //calculate maximum time to reach next class on time
         int gap_classes = classes[schedule[i + 1]].getStartMinutes() - classes[schedule[i]].getEndMinutes();
+
+        //check if shortest path (least time) is less or equal than the gap between class 
+        //and if the class is reachable
         bool is_possible = gap_classes >= next_class_shortest_time && next_class_shortest_time != -1;
         cout<<schedule[i]<<" - "<<schedule[i + 1]<<": "<<(is_possible ? "successful" : "unsuccessful") << endl;
     }

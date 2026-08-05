@@ -1,75 +1,110 @@
-#include <catch2/catch_test_macros.hpp>
-#include <iostream>
+// #include <catch2/catch_test_macros.hpp>
+// #include <iostream>
 
-// change if you choose to use a different header name
-#include "CampusCompass.h"
+// // change if you choose to use a different header name
+// #include "CampusCompass.h"
 
-using namespace std;
+// using namespace std;
 
-TEST_CASE("Incorrect Commands", "[Test 1]") {
-  CampusCompass compass;
+// TEST_CASE("Incorrect Commands", "[Test 1]") {
+//   CampusCompass c;
+//   c.parseCSV("data/edges.csv", "data/classes.csv");
 
+//   //insert invalid name
+//   REQUIRE(c.insert("\"A11y\" 45679999 1 1 COP3530") == false);
+
+//   //insert 7 numbers id
+//   REQUIRE(c.insert("\"Bob\" 4567999 1 1 COP3530")   == false);
   
-}
+//   //insert invalid class code name
+//   REQUIRE(c.insert("\"Bob\" 45679999 1 1 cop3530")  == false); 
 
-TEST_CASE("Test 2", "[tag]") {
-  // you can also use "sections" to share setup code between tests, for example:
-  int one = 1;
+//   //insert invalid class code number (must be more than 0)
+//   REQUIRE(c.insert("\"Bob\" 45679999 1 0") == false);
+  
+//   //drop class from invalid ID 
+//   REQUIRE(c.dropClass("111122", "COP3530") == false);
 
-  SECTION("num is 2") {
-    int num = one + 1;
-    REQUIRE(num == 2);
-  };
+//   //remove class that does not exist
+//   REQUIRE(c.removeClass("3033030") == false);
+// }
 
-  SECTION("num is 3") {
-    int num = one + 2;
-    REQUIRE(num == 3);
-  };
 
-  // each section runs the setup code independently to ensure that they don't
-  // affect each other
-}
+// TEST_CASE("Edge Cases", "[Test 2]") {
+//   CampusCompass c;
+//   c.parseCSV("data/edges.csv", "data/classes.csv");
+  
+//   //remove a non-existent student
+//   REQUIRE(c.remove("11111111") == false);
 
-// Refer to Canvas for a list of required tests. 
-// We encourage you to write more than required to ensure proper functionality, but only the ones on Canvas will be graded.
+//   //check unique ID insertion
+//   REQUIRE(c.insert("\"John\" 22222222 20 1 COP3530") == true);
+//   REQUIRE(c.insert("\"Alberto\" 22222222 20 1 COP3530") == false);
 
-// See the following for an example of how to easily test your output.
-// Note that while this works, I recommend also creating plenty of unit tests for particular functions within your code.
-// This pattern should only be used for final, end-to-end testing.
 
-// This uses C++ "raw strings" and assumes your CampusCompass outputs a string with
-//   the same thing you print.
-TEST_CASE("Example CampusCompass Output Test", "[flag]") {
-  // the following is a "raw string" - you can write the exact input (without
-  //   any indentation!) and it should work as expected
-  // this is based on the input and output of the first public test case
-  string input = R"(6
-insert "Student A" 10000001 1 1 COP3502
-insert "Student B" 10000002 1 1 COP3502
-insert "Student C" 10000003 1 2 COP3502 MAC2311
-dropClass 10000001 COP3502
-remove 10000001
-removeClass COP3502
-)";
+//   //remove students that are already removed
+//   REQUIRE(c.dropClass("22222222", "COP3530") == true);   // still successful
+//   REQUIRE(c.remove("22222222") == false);
 
-  string expectedOutput = R"(successful
-successful
-successful
-successful
-unsuccessful
-2
-)";
+//   //more than 6 classes
+//   REQUIRE(c.insert("\"Steph\" 44444444 20 7 COP3502 COP3503 COP3504 COT3100 MAC2311 MAC2312 CDA3101") == false);
 
-  string actualOutput;
+//   //edges that do not exist return DNE
+//   REQUIRE(c.checkEdgeStatus(1, 3) == "DNE");
+//   REQUIRE(c.checkEdgeStatus(99, 100) == "DNE");
 
-  // somehow pass your input into your CampusCompass and parse it to call the
-  // correct functions, for example:
-  /*
-  CampusCompass c;
-  c.parseInput(input)
-  // this would be some function that sends the output from your class into a string for use in testing
-  actualOutput = c.getStringRepresentation()
-  */
+// }
 
-  REQUIRE(actualOutput == expectedOutput);
-}
+// TEST_CASE("Check Functions", "[Test 3]") {
+//   CampusCompass c;
+//   c.parseCSV("data/edges.csv", "data/classes.csv");
+
+//   REQUIRE(c.insert("\"Brandon\" 45679999 20 2 COP3530 MAC2311") == true);
+//   REQUIRE(c.insert("\"Brian\" 35459999 21 3 COP3530 CDA3101 MAC2311") == true);
+//   REQUIRE(c.insert("\"Briana\" 87879999 22 3 CDA3101 MAC2311 EEL3701") == true);
+
+//   //removes one class, leaves the rest
+//   REQUIRE(c.dropClass("35459999", "CDA3101") == true);
+
+//   //swaps one for the other, count unchanged
+//   REQUIRE(c.replaceClass("45679999", "COP3530", "CDA3101") == true);
+
+//   //returns how many students it was dropped from
+//   REQUIRE(c.removeClass("MAC2311") == 3);
+
+//   //succeeds once, fails the second time
+//   REQUIRE(c.remove("87879999") == true);
+//   REQUIRE(c.remove("87879999") == false);
+
+// }
+
+// TEST_CASE("printShortestEdges Test", "[Test 4]") {
+//   CampusCompass c;
+//   c.parseCSV("data/edges.csv", "data/classes.csv");
+  
+  
+//   REQUIRE(c.insert("\"Brian\" 35459999 20 2 PHY2048 COP3530") == true);
+
+//   //check shortest path before closing edges
+//   auto before = c.printShortestEdges("35459999");
+//   REQUIRE(before["PHY2048"] == 14);
+//   REQUIRE(before["COP3530"] == 20);
+//   REQUIRE(c.checkEdgeStatus(56, 49) == "open");
+
+//   //toggle edge to close it 
+//   REQUIRE(c.toggleEdgesClosure("1 56 49") == true);
+//   REQUIRE(c.checkEdgeStatus(56, 49) == "closed");
+
+//   //PHY2048 becomes unreachable as 56-49 is the 
+//   //only edge to reach building 56 where PHY2048 takes place
+//   auto after = c.printShortestEdges("35459999");
+//   REQUIRE(after["PHY2048"] == -1);
+//   REQUIRE(after["COP3530"] == 20);
+//   REQUIRE(c.isConnected(20, 56) == false);
+
+//   //reopen the 56-49 edge
+//   REQUIRE(c.toggleEdgesClosure("1 56 49") == true);
+//   REQUIRE(c.printShortestEdges("35459999")["PHY2048"] == 14);
+//   REQUIRE(c.checkEdgeStatus(56, 49) == "open");
+
+// }

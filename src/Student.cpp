@@ -19,15 +19,18 @@ set<string> Student::getClassCodes() const {
     return class_codes;
 }
 
+//insert class to student's classes
 void Student::addClass(const string& code) {
     class_codes.insert(code);
 }
 
 bool Student::hasClass(const string& code) const {
+    //check if student has a certain class
     return class_codes.find(code) != class_codes.end();
 }
 
 bool Student::removeClass(const string& code) {
+    //remove a class
     auto it = class_codes.find(code);
     if (it != class_codes.end()) {
         class_codes.erase(it);
