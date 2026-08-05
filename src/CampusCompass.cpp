@@ -169,7 +169,7 @@ bool CampusCompass::isValidClassCode(const string& s) const {
     return true; 
 }
 
-void CampusCompass::insert(const string& args) {
+bool CampusCompass::insert(const string& args) {
     istringstream ss(args);
     string id, name, residence_id_str, num_classes_str;
     size_t num_classes;
@@ -193,12 +193,12 @@ void CampusCompass::insert(const string& args) {
                 num_classes = stoi(num_classes_str);
             } catch (const exception& e) {
                 cout << "unsuccessful" << endl;
-                return;
+                return false;
             }
 
             if(num_classes <= 0 || num_classes >= 7) {
                 cout << "unsuccessful" << endl;
-                return; 
+                return false; 
             }
         } else {
             class_codes.insert(s);
@@ -209,7 +209,7 @@ void CampusCompass::insert(const string& args) {
 
     if (count != 4 || class_codes.size() != num_classes) {
         cout << "unsuccessful" << endl;
-        return; 
+        return false; 
     }
     if (isValidUfid(id) && isValidName(name) && students.find(id) == students.end()) {
         try{
@@ -217,7 +217,7 @@ void CampusCompass::insert(const string& args) {
             students[id] = Student(name, residence_id);
         } catch (const exception& e) {
             cout << "unsuccessful" << endl;
-            return;
+            return false;
         }
 
         for (const auto& code : class_codes) {
@@ -226,32 +226,37 @@ void CampusCompass::insert(const string& args) {
             } else {
                 students.erase(id);
                 cout << "unsuccessful" << endl;
-                return;
+                return false;
             }
         }
 
         cout << "successful" << endl;
+        return true;
 
     } else {
         cout << "unsuccessful" << endl;
+        return false;
     }
 }
 
-void CampusCompass::remove(const string& id) {
+bool CampusCompass::remove(const string& id) {
     if (isValidUfid(id)) {
         auto it = students.find(id);
         if (it != students.end()) {
             students.erase(it);
             cout << "successful" << endl;
+            return true;
         } else {
             cout << "unsuccessful" << endl;
+            return false;
         }
     } else {
         cout << "unsuccessful" << endl;
+        return false;
     }
 }
 
-void CampusCompass::dropClass(const string& id, const string& code) {
+bool CampusCompass::dropClass(const string& id, const string& code) {
     if (isValidUfid(id) && isValidClassCode(code)) {
         auto it = students.find(id);
         if (it != students.end() && classes.find(code) != classes.end()) {
@@ -261,18 +266,22 @@ void CampusCompass::dropClass(const string& id, const string& code) {
                     students.erase(it);
                 }
                 cout << "successful" << endl;
+                return true;
             } else {
                 cout << "unsuccessful" << endl;
+                return false;
             }
         } else {
             cout << "unsuccessful" << endl;
+            return false;
         }
     } else {
         cout << "unsuccessful" << endl;
+        return false;
     }
 }
 
-void CampusCompass::replaceClass(const string& id, const string& c1, const string& c2) {
+bool CampusCompass::replaceClass(const string& id, const string& c1, const string& c2) {
     if (isValidUfid(id) && isValidClassCode(c1) && isValidClassCode(c2)) {
         auto it = students.find(id);
         if (it != students.end()) {
@@ -280,18 +289,22 @@ void CampusCompass::replaceClass(const string& id, const string& c1, const strin
                 it->second.removeClass(c1);
                 it->second.addClass(c2);
                 cout << "successful" << endl;
+                return true;
             } else {
                 cout << "unsuccessful" << endl;
+                return false;
             }
         } else {
             cout << "unsuccessful" << endl;
+            return false;
         }
     } else {
         cout << "unsuccessful" << endl;
+        return false;
     }
 }
 
-void CampusCompass::removeClass(const string& code) {
+int CampusCompass::removeClass(const string& code) {
     int canceled_count = 0;
     if (isValidClassCode(code) && classes.find(code) != classes.end()) {
         auto it = students.begin();
@@ -311,9 +324,11 @@ void CampusCompass::removeClass(const string& code) {
     } else {
         cout << "unsuccessful" << endl;
     }
+
+    return canceled_count;
 }
 
-void CampusCompass::toggleEdgesClosure(const string& args) {
+bool CampusCompass::toggleEdgesClosure(const string& args) {
     istringstream ss(args);
     string n_str;
     int n;
@@ -323,7 +338,7 @@ void CampusCompass::toggleEdgesClosure(const string& args) {
         n = stoi(n_str);
     } catch (const exception& e) {
         cout << "unsuccessful" << endl;
-        return;
+        return false;
     }
 
     string a_str, b_str;
@@ -338,41 +353,51 @@ void CampusCompass::toggleEdgesClosure(const string& args) {
     }
 
     cout << "successful" << endl;
+    return true;
 
 }
 
 
-void CampusCompass::checkEdgeStatus(int a, int b) {
+string CampusCompass::checkEdgeStatus(int a, int b) {
     int status = graph.getEdgeStatus(a, b);
     if (status == -1) {
         cout << "DNE" << endl;
+        return "DNE";
     } else {
         cout << (status == 1 ? "closed" : "open") << endl;
     }
+
+    return status == 1 ? "closed" : "open";
 }
 
-void CampusCompass::isConnected(int a, int b) {
+bool CampusCompass::isConnected(int a, int b) {
     if (graph.isConnected(a, b)) {
         cout << "successful" << endl;
+        return true;
     } else {
         cout << "unsuccessful" << endl;
+        return false;
     }
 }
 
-void CampusCompass::printShortestEdges(const string& id) {
+map<string,int> CampusCompass::printShortestEdges(const string& id) {
     auto student = students[id];
     int residence_id = student.getResidenceId();
     auto shortest_paths = graph.dijkstra(residence_id);
 
     cout<<"Time For Shortest Edges: "<<student.getName()<<endl;
+    map<string, int> result;
 
     for (const string& student_class : student.getClassCodes()) {
         if (classes.find(student_class) != classes.end()) {
             int class_location = classes[student_class].getLocationId();
             int shortest_time = shortest_paths[class_location].first;
+            result[student_class] = shortest_time;
             cout<<student_class<<": "<<shortest_time<<endl;
         }
     }
+
+    return result;
 }
 
 void CampusCompass::printStudentZone(const string& id) {
