@@ -26,6 +26,7 @@ private:
     void isConnected(int a, int b);
     void printShortestEdges(const std::string& id);
     void printStudentZone(const std::string& id);
+    void verifySchedule(const std::string& id);
 
 public:
     CampusCompass();

@@ -6,6 +6,8 @@
 #include <sstream>
 #include <iostream>
 #include <regex>
+#include <algorithm>
+#include <set>
 
 using namespace std;
 
@@ -127,9 +129,17 @@ bool CampusCompass::parseCommand(const string &command) {
         printShortestEdges(command.substr(cmd.length() + 1));
 
     } else if(cmd == "printStudentZone"){
+
         printStudentZone(command.substr(cmd.length() + 1));
+
+    } else if(cmd == "verifySchedule"){
+
+        verifySchedule(command.substr(cmd.length() + 1));
+
     } else {
+
         is_valid = false; 
+        
     }
 
     return is_valid;
@@ -356,7 +366,7 @@ void CampusCompass::printShortestEdges(const string& id) {
 
     cout<<"Time For Shortest Edges: "<<student.getName()<<endl;
 
-    for (const auto& student_class : student.getClassCodes()) {
+    for (const string& student_class : student.getClassCodes()) {
         if (classes.find(student_class) != classes.end()) {
             int class_location = classes[student_class].getLocationId();
             int shortest_time = shortest_paths[class_location].first;
@@ -374,7 +384,7 @@ void CampusCompass::printStudentZone(const string& id) {
     zone_locations.insert(residence_id);
 
 
-    for (const auto& student_class : student.getClassCodes()) {
+    for (const string& student_class : student.getClassCodes()) {
         if (classes.find(student_class) != classes.end()) {
             int class_location = classes[student_class].getLocationId();
             int shortest_time = shortest_paths[class_location].first;
@@ -394,4 +404,40 @@ void CampusCompass::printStudentZone(const string& id) {
 
     cout<<"Student Zone Cost For " << student.getName() <<": "<< mst_cost<<endl;
 
+}
+
+void CampusCompass::verifySchedule(const string& id){
+    auto student = students[id];
+    set<string> class_codes = student.getClassCodes();
+    vector<string> schedule;
+    for (const string& code : class_codes) {
+        if (classes.find(code) != classes.end()) {
+            schedule.push_back(code);
+        }
+    }
+
+    if(schedule.size() < 2){
+        cout<<"unsuccessful"<<endl;
+        return;
+    }
+
+    sort(schedule.begin(), schedule.end(), [this](const string& a, const string& b){
+        int start_time_a = classes[a].getStartMinutes();
+        int start_time_b = classes[b].getStartMinutes();
+        if(start_time_a != start_time_b) return start_time_a < start_time_b;
+        return a < b;
+    });
+    
+    cout << "Schedule Check for " << student.getName() << ":" << endl;
+
+    for (int i = 0; i < schedule.size() - 1; i++) {
+        int class_location_1 = classes[schedule[i]].getLocationId();
+        int class_location_2 = classes[schedule[i + 1]].getLocationId();
+
+        auto shortest_times = graph.dijkstra(class_location_1);
+        int next_class_shortest_time = shortest_times[class_location_2].first;
+        int gap_classes = classes[schedule[i + 1]].getStartMinutes() - classes[schedule[i]].getEndMinutes();
+        bool is_possible = gap_classes >= next_class_shortest_time && next_class_shortest_time != -1;
+        cout<<schedule[i]<<" - "<<schedule[i + 1]<<": "<<(is_possible ? "successful" : "unsuccessful") << endl;
+    }
 }
